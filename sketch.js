@@ -1,9 +1,9 @@
 let scenes = [];
 let mSerial;
 let readyToReceive = false;
-let connectButton; // 连接 Arduino 按钮（全局变量）
+let connectButton; // Connect Arduino button (global variable)
 
-// 视频 & 图片文件
+// Video & image files
 let media = [
   { img: "Still1Test.jpg", video: "Scene1Test.mp4" },
   { img: "Still2Test.jpg", video: "Scene2Test.mp4" },
@@ -14,8 +14,8 @@ let media = [
 function preload() {
   for (let i = 0; i < media.length; i++) {
     let vid = createVideo(media[i].video);
-    vid.hide(); // 隐藏 HTML 视频
-    vid.elt.muted = true; // 确保无声音，避免浏览器限制
+    vid.hide(); // Hide HTML video
+    vid.elt.muted = true; // Ensure no sound to avoid browser restrictions
     scenes.push({
       img: loadImage(media[i].img),
       video: vid,
@@ -28,12 +28,12 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   mSerial = createSerial();
 
-  // 创建 Arduino 连接按钮
-  connectButton = createButton("连接 Arduino");
+  // Create Arduino connection button
+  connectButton = createButton("Connect Arduino");
   connectButton.position(20, 20);
   connectButton.mousePressed(connectToSerial);
 
-  console.log("等待串口连接...");
+  console.log("Waiting for serial connection...");
 }
 
 function draw() {
@@ -50,11 +50,11 @@ function draw() {
     }
   }
 
-  // 监听 Arduino 串口数据
+  // Listen for Arduino serial data
   if (mSerial.opened() && readyToReceive) {
     readyToReceive = false;
     mSerial.clear();
-    mSerial.write(0xab); // 发送请求给 Arduino
+    mSerial.write(0xab); // Send request to Arduino
   }
 
   if (mSerial.availableBytes() > 0) {
@@ -81,10 +81,10 @@ function receiveSerial() {
   trim(line);
   if (!line) return;
 
-  console.log("接收到数据: ", line);
+  console.log("Received data: ", line);
 
   if (line.charAt(0) != "{") {
-    console.log("数据解析错误: ", line);
+    console.log("Data parsing error: ", line);
     readyToReceive = true;
     return;
   }
@@ -93,18 +93,18 @@ function receiveSerial() {
   try {
     json = JSON.parse(line);
   } catch (e) {
-    console.error("JSON 解析失败: ", e);
+    console.error("JSON parsing failed: ", e);
     readyToReceive = true;
     return;
   }
 
   let data = json.data;
-  console.log("解析后的数据: ", data);
+  console.log("Parsed data: ", data);
 
-  // 解析 Arduino 按钮状态并触发视频
+  // Parse Arduino button states and trigger video
   for (let i = 0; i < 4; i++) {
     if (data["button" + (i + 1)]) {
-      console.log("播放视频: Scene", i + 1);
+      console.log("Playing video: Scene", i + 1);
       playScene(i);
     }
   }
@@ -116,9 +116,9 @@ function connectToSerial() {
   if (!mSerial.opened()) {
     mSerial.open(9600);
     readyToReceive = true;
-    console.log("串口已连接");
+    console.log("Serial connected");
 
-    // **彻底删除按钮**
+    // **Completely remove the button**
     connectButton.remove();
   }
 }
