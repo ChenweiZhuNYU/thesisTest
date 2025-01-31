@@ -1,6 +1,9 @@
 let scenes = [];
 let mSerial;
 let readyToReceive = false;
+let connectButton; // 连接 Arduino 按钮（全局变量）
+
+// 视频 & 图片文件
 let media = [
   { img: "Still1Test.jpg", video: "Scene1Test.mp4" },
   { img: "Still2Test.jpg", video: "Scene2Test.mp4" },
@@ -12,7 +15,7 @@ function preload() {
   for (let i = 0; i < media.length; i++) {
     let vid = createVideo(media[i].video);
     vid.hide(); // 隐藏 HTML 视频
-    vid.elt.muted = true; // 确保视频无声，避免浏览器限制
+    vid.elt.muted = true; // 确保无声音，避免浏览器限制
     scenes.push({
       img: loadImage(media[i].img),
       video: vid,
@@ -25,8 +28,8 @@ function setup() {
   createCanvas(windowWidth, windowHeight);
   mSerial = createSerial();
 
-  // 创建串口连接按钮
-  let connectButton = createButton("连接 Arduino");
+  // 创建 Arduino 连接按钮
+  connectButton = createButton("连接 Arduino");
   connectButton.position(20, 20);
   connectButton.mousePressed(connectToSerial);
 
@@ -47,11 +50,11 @@ function draw() {
     }
   }
 
-  // 监听串口数据
+  // 监听 Arduino 串口数据
   if (mSerial.opened() && readyToReceive) {
     readyToReceive = false;
     mSerial.clear();
-    mSerial.write(0xab); // 向 Arduino 发送请求
+    mSerial.write(0xab); // 发送请求给 Arduino
   }
 
   if (mSerial.availableBytes() > 0) {
@@ -78,7 +81,7 @@ function receiveSerial() {
   trim(line);
   if (!line) return;
 
-  console.log("接收到数据: ", line); // 调试输出原始数据
+  console.log("接收到数据: ", line);
 
   if (line.charAt(0) != "{") {
     console.log("数据解析错误: ", line);
@@ -96,9 +99,9 @@ function receiveSerial() {
   }
 
   let data = json.data;
-  console.log("解析后的数据: ", data); // 检查数据格式
+  console.log("解析后的数据: ", data);
 
-  // 检测按钮状态
+  // 解析 Arduino 按钮状态并触发视频
   for (let i = 0; i < 4; i++) {
     if (data["button" + (i + 1)]) {
       console.log("播放视频: Scene", i + 1);
@@ -114,6 +117,9 @@ function connectToSerial() {
     mSerial.open(9600);
     readyToReceive = true;
     console.log("串口已连接");
+
+    // **彻底删除按钮**
+    connectButton.remove();
   }
 }
 
