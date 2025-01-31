@@ -2,6 +2,7 @@
 <html>
   <head>
     <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.js"></script>
+    <script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
     <script src="sketch.js"></script>
     <style>
       * {
@@ -15,9 +16,13 @@
       }
       #main {
         display: block;
-        width: 100%;
+        width: 100vw;
         height: 100vh;
       }
+      @font-face {
+    font-family: 'Cute';
+    src: url('cute.ttf') format('truetype');
+}
     </style>
   </head>
   <body>
