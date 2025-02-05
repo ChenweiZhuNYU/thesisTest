@@ -36,7 +36,7 @@ void setup() {
   }
 
   pinMode(ledPin, OUTPUT); // Initialize LED pin
-  digitalWrite(ledPin, LOW); // Ensure LED is off at the start
+  digitalWrite(ledPin, HIGH); // Ensure LED is off at the start (HIGH = OFF for low-level trigger)
 }
 
 void loop() {
@@ -59,7 +59,7 @@ void loop() {
 
   // After 8 seconds, turn on the LED
   if (isWaiting && (millis() - eventStartTime >= waitDuration)) {
-    digitalWrite(ledPin, HIGH); // Turn on LED
+    digitalWrite(ledPin, LOW); // Turn on LED (LOW = ON for low-level trigger)
     isLedOn = true;
     isWaiting = false; // Stop waiting period
     eventStartTime = millis(); // Reset time for LED countdown
@@ -67,7 +67,7 @@ void loop() {
 
   // After 5 seconds of LED being on, turn it off
   if (isLedOn && (millis() - eventStartTime >= ledDuration)) {
-    digitalWrite(ledPin, LOW); // Turn off LED
+    digitalWrite(ledPin, HIGH); // Turn off LED (HIGH = OFF for low-level trigger)
     isLedOn = false;
   }
 
