@@ -1,9 +1,10 @@
 #include <ArduinoJson.h>
 
-// Analog pins connected to buttons
+// Analog pins connected to buttons and light sensor
 const int buttonPins[4] = {A5, A4, A3, A2};
 bool buttonStates[4] = {false, false, false, false}; // Record button states
-const int threshold = 100; // Set voltage threshold; below 100 is considered pressed
+const int buttonThreshold = 100; // Button voltage threshold; below 100 is considered pressed
+const int lightSensorThreshold = 400; // Light sensor threshold; above 1000 is considered pressed
 const int ledPin = 13; // Define LED pin
 
 unsigned long eventStartTime = 0; // Record the time when button is pressed
@@ -21,9 +22,9 @@ void sendData() {
     data["button" + String(i + 1)] = buttonStates[i]; 
   }
 
-  String resTxt = "";
+  String resTxt;
   serializeJson(resJson, resTxt);
-  Serial.println(resTxt);
+  Serial.println(resTxt);  // Ensure newline for p5.js compatibility
 }
 
 void setup() {
@@ -35,47 +36,49 @@ void setup() {
     pinMode(buttonPins[i], INPUT);
   }
 
-  pinMode(ledPin, OUTPUT); // Initialize LED pin
-  digitalWrite(ledPin, HIGH); // Ensure LED is off at the start (HIGH = OFF for low-level trigger)
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, HIGH);
 }
 
 void loop() {
-  bool updated = false; // Record whether any button state has changed
+  bool updated = false;
 
   for (int i = 0; i < 4; i++) {
-    int analogValue = analogRead(buttonPins[i]); // Read voltage
-    bool newState = analogValue > threshold; // Below threshold is considered pressed
+    int analogValue = analogRead(buttonPins[i]);
+    bool newState;
+    if (i == 2) { // A3 is now a light sensor
+      newState = analogValue > lightSensorThreshold;
+    } else {
+      newState = analogValue > buttonThreshold;
+    }
+    
     if (newState != buttonStates[i]) {
       buttonStates[i] = newState;
       updated = true;
     }
   }
 
-  // If A2 button is pressed and we are not already waiting
-  if (buttonStates[3] && !isWaiting && !isLedOn) { 
-    eventStartTime = millis(); // Record the time when button was pressed
-    isWaiting = true; // Start waiting period
+  if (buttonStates[3] && !isWaiting && !isLedOn) {
+    eventStartTime = millis();
+    isWaiting = true;
   }
 
-  // After 8 seconds, turn on the LED
   if (isWaiting && (millis() - eventStartTime >= waitDuration)) {
-    digitalWrite(ledPin, LOW); // Turn on LED (LOW = ON for low-level trigger)
+    digitalWrite(ledPin, LOW);
     isLedOn = true;
-    isWaiting = false; // Stop waiting period
-    eventStartTime = millis(); // Reset time for LED countdown
+    isWaiting = false;
+    eventStartTime = millis();
   }
 
-  // After 5 seconds of LED being on, turn it off
   if (isLedOn && (millis() - eventStartTime >= ledDuration)) {
-    digitalWrite(ledPin, HIGH); // Turn off LED (HIGH = OFF for low-level trigger)
+    digitalWrite(ledPin, HIGH);
     isLedOn = false;
   }
 
-  // Send data only when button state changes
   if (updated) {
     sendData();
   }
 
-  delay(10); // Prevent excessive data transmission
+  delay(10);
 }
 
