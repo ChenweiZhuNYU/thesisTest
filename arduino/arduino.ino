@@ -1,10 +1,12 @@
 #include <ArduinoJson.h>
 
-// Analog pins connected to buttons and light sensor
+// Analog pins connected to buttons and sensors
 const int buttonPins[4] = {A5, A4, A3, A2};
 bool buttonStates[4] = {false, false, false, false}; // Record button states
 const int buttonThreshold = 100; // Button voltage threshold; below 100 is considered pressed
-const int lightSensorThreshold = 400; // Light sensor threshold; above 1000 is considered pressed
+const int lightSensorThreshold = 400; // Light sensor threshold; above 400 is considered pressed
+const int tiltSensorThreshold = 30; // Tilt sensor threshold; above 3500 is considered pressed
+const int pressureSensorThreshold = 300; // Pressure sensor threshold; above 3700 is considered pressed
 const int ledPin = 13; // Define LED pin
 
 unsigned long eventStartTime = 0; // Record the time when button is pressed
@@ -46,8 +48,19 @@ void loop() {
   for (int i = 0; i < 4; i++) {
     int analogValue = analogRead(buttonPins[i]);
     bool newState;
+    
     if (i == 2) { // A3 is now a light sensor
+      //Serial.print("Light sensor value (A3): ");
+      //Serial.println(analogValue);
       newState = analogValue > lightSensorThreshold;
+    } else if (i == 1) { // A4 is now a tilt sensor
+      //Serial.print("Tilt sensor value (A4): ");
+      //Serial.println(analogValue);
+      newState = analogValue > tiltSensorThreshold;
+    } else if (i == 0) { // A5 is now a pressure sensor
+      //Serial.print("Pressure sensor value (A5): ");
+      //Serial.println(analogValue);
+      newState = analogValue > pressureSensorThreshold;
     } else {
       newState = analogValue > buttonThreshold;
     }
