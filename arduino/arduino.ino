@@ -50,8 +50,8 @@ void loop() {
     bool newState;
     
     if (i == 2) { // A3 is now a light sensor
-      //Serial.print("Light sensor value (A3): ");
-      //Serial.println(analogValue);
+      Serial.print("Light sensor value (A3): ");
+      Serial.println(analogValue);
       newState = analogValue > lightSensorThreshold;
     } else if (i == 1) { // A4 is now a tilt sensor
       //Serial.print("Tilt sensor value (A4): ");
